@@ -30,6 +30,7 @@ just build-sysext          # build the k0s sysext
 just export-sysext         # export sysext artifacts to dist/sysext/
 just flash-installer       # write the installer image to a USB device
 just show-me-the-future    # end-to-end QEMU installer smoke test
+just test-installer-artifact # test already-exported artifacts in QEMU without rebuilding
 just tags                  # show FSDK-derived version tags
 ```
 

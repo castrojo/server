@@ -214,9 +214,17 @@ flash-installer DEVICE="":
     sudo sh -c "zstd -dc ${IMG} | dd of={{DEVICE}} bs=4M iflag=fullblock oflag=direct status=progress conv=fsync"
     echo "Successfully flashed the Bluefin Server installer to {{DEVICE}}!"
 
-# Build, install, and reboot the server in QEMU using the raw installer disk.
+# Build the installer artifacts, then run the reusable artifact smoke path.
 [group('test')]
 show-me-the-future:
+    just build-installer
+    just export-installer
+    just export-sysext
+    just test-installer-artifact
+
+# Install and reboot already-exported server artifacts in QEMU.
+[group('test')]
+test-installer-artifact:
     #!/usr/bin/env bash
     set -euo pipefail
 
@@ -224,9 +232,6 @@ show-me-the-future:
     mkdir -p "$CACHE_DIR"
     WORKDIR="$(mktemp -d "${CACHE_DIR}/bluefin-show-future.XXXXXX")"
     trap 'rm -rf "$WORKDIR"' EXIT
-
-    just build-installer
-    just export-installer
 
     cp dist/bluefin-server-installer-*.raw.zst "$WORKDIR/installer.raw.zst"
     cp dist/bluefin-server-pxe-vmlinuz-* "$WORKDIR/installer.vmlinuz"
@@ -297,14 +302,7 @@ show-me-the-future:
         -no-reboot < /dev/null
 
     echo "==> Preparing target /var refresh with offline k0s sysext and smoke secret..."
-    K0S_RAW_ZST=""
-    if [ -d dist/sysext ]; then
-      K0S_RAW_ZST=$(find dist/sysext/ -maxdepth 1 -type f -name 'k0s-*.raw.zst' 2>/dev/null | head -n 1 || true)
-    fi
-    if [ -z "$K0S_RAW_ZST" ]; then
-      just export-sysext
-      K0S_RAW_ZST=$(find dist/sysext/ -maxdepth 1 -type f -name 'k0s-*.raw.zst' | head -n 1)
-    fi
+    K0S_RAW_ZST=$(find dist/sysext/ -maxdepth 1 -type f -name 'k0s-*.raw.zst' -print -quit 2>/dev/null || true)
     [ -n "$K0S_RAW_ZST" ] || { echo "ERROR: k0s sysext not found in dist/sysext" >&2; exit 1; }
 
     VAR_STAGING="$WORKDIR/var-staging"
