@@ -26,10 +26,17 @@ existing `flatcar/flatcar-kernel.bst` and `flatcar/flatcar-zfs.bst` model and
 keeps the OS payload on a single upstream ABI domain as the Flatcar migration
 lands.
 
-Hard rules 2-6 are unchanged. The CPU baseline remains broad, the installer
-stays `systemd-sysinstall`-native and `systemd-repart`-based, k0s and container
-runtimes stay out of the base OS DDI, boot entries keep using GPT `PARTUUID`,
-and duplicated sources of truth remain prohibited.
+Hard rules 2-6 remain active. The CPU baseline remains broad, the installer
+stays `systemd-sysinstall`-native and `systemd-repart`-based, boot entries keep
+using GPT `PARTUUID`, and duplicated sources of truth remain prohibited.
+
+Regarding Hard Rule 4 ("Deliver k0s as an optional `systemd-sysext`; never bundle
+Kubernetes or container runtimes into the base OS DDI"): container runtimes
+(podman, containerd, docker) and Kubernetes distributions must remain delivered
+via standalone system extension images (`systemd-sysext` `.raw` files under
+`/usr/lib/sysexts`), rather than being baked directly into the base OS `/usr`
+payload filesystem. Staging `.raw` sysext files under `/usr/lib/sysexts` for
+runtime attachment satisfies this boundary.
 
 ## Rejected alternatives
 
