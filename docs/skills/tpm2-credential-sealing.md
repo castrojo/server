@@ -22,7 +22,7 @@ decrypts and routes at boot:
 | Credential | Consumer | Purpose |
 |---|---|---|
 | `passwd.hashed-password.root` | `systemd-sysusers` / `systemd-firstboot` | Optional root password hash for break-glass provisioning. |
-| `tmpfiles.extra` | `systemd-tmpfiles` | Extra tmpfiles rules, including `core` SSH `authorized_keys`. |
+| `tmpfiles.extra` | `systemd-tmpfiles` | Extra tmpfiles rules, such as writing an operator's SSH `authorized_keys`. |
 | `network.network.*`, `network.netdev.*`, `network.link.*`, `network.conf.*` | `systemd-network-generator` | Static network, routes, virtual devices, and networkd config. |
 | `network.dns`, `network.search_domains` | `systemd-resolved` | DNS resolver defaults. |
 | `firstboot.locale`, `firstboot.locale-messages`, `firstboot.keymap`, `firstboot.timezone`, `firstboot.hostname` | `bluefin-firstboot-credentials.service` | Non-interactive locale, keymap, timezone, and hostname setup. |
@@ -78,7 +78,8 @@ cp /path/to/secured_credential.cred \
 --set-credential=passwd.hashed-password.root:/path/to/secured_credential.cred
 ```
 
-Example `tmpfiles.extra` payload for `core` SSH access:
+Example `tmpfiles.extra` payload writing SSH `authorized_keys` for an operator
+account (the account itself must already be defined by `systemd-sysusers`):
 
 ```text
 f~ /var/home/core/.ssh/authorized_keys 0600 core core - c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTEAAAA...

@@ -48,10 +48,10 @@ terminal-based interactive installation that:
 
 User provisioning is handled on the target system's first boot via systemd
 system credentials so the base image remains stateless. `systemd-sysusers`
-consumes root and `core` account records, `systemd-tmpfiles` consumes
-`tmpfiles.extra` for files such as `core` SSH `authorized_keys`, and
-`systemd-network-generator` consumes `network.network.*` / `network.netdev.*`
-credentials before networkd starts. The stock interactive
+consumes root account records, `systemd-tmpfiles` consumes `tmpfiles.extra`
+for arbitrary first-boot files, and `systemd-network-generator` consumes
+`network.conf.*` / `network.link.*` / `network.netdev.*` /
+`network.network.*` credentials before networkd starts. The stock interactive
 `systemd-firstboot.service` stays masked, but
 `bluefin-firstboot-credentials.service` runs `systemd-firstboot`
 non-interactively when `firstboot.locale`, `firstboot.timezone`,

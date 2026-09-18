@@ -9,8 +9,6 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ELEMENT = REPO_ROOT / "elements" / "bluefin-server" / "os-creds-prov.bst"
 STACK = REPO_ROOT / "elements" / "bluefin-server" / "os-stack.bst"
-SYSUSERS = REPO_ROOT / "files" / "os" / "sysusers.d"
-TMPFILES = REPO_ROOT / "files" / "os" / "creds" / "tmpfiles.d" / "10-core-home.conf"
 FIRSTBOOT = (
     REPO_ROOT
     / "files"
@@ -60,27 +58,12 @@ def test_creds_provisioning_element_stages_all_credential_consumers() -> None:
     sources = {source["directory"]: source["path"] for source in data["sources"]}
     assert sources == {
         "sysusers-src": "files/os/sysusers.d",
-        "tmpfiles-src": "files/os/creds/tmpfiles.d",
         "systemd-src": "files/os/creds/systemd/system",
     }
 
     commands = "\n".join(data["config"]["install-commands"])
     assert "/usr/lib/sysusers.d/" in commands
-    assert "/usr/lib/tmpfiles.d/" in commands
     assert "cp -a systemd-src/." in commands
-
-
-def test_core_user_and_tmpfiles_extra_target_are_provisioned() -> None:
-    sysusers = (SYSUSERS / "10-core-user.conf").read_text(encoding="utf-8")
-    tmpfiles = TMPFILES.read_text(encoding="utf-8")
-
-    assert 'u core 1000 "Core Operator" /var/home/core /bin/bash' in sysusers
-    assert "m core wheel" in sysusers
-    assert "L /home - - - - /var/home" in tmpfiles
-    assert "d /var/home/core 0700 core core -" in tmpfiles
-    assert "d /var/home/core/.ssh 0700 core core -" in tmpfiles
-    assert "tmpfiles.extra" in tmpfiles
-    assert "/var/home/core/.ssh/authorized_keys" in tmpfiles
 
 
 def test_firstboot_credentials_are_noninteractive_and_presence_gated() -> None:
@@ -119,7 +102,11 @@ def test_network_credentials_override_dhcp_without_removing_fallback() -> None:
     assert "network.network.*" in skill
     assert "network.netdev.*" in skill
     assert NETWORK_GENERATOR_DROPIN.read_text(encoding="utf-8") == (
-        "[Service]\nImportCredential=network.conf.*\n"
+        "[Service]\n"
+        "ImportCredential=network.conf.*\n"
+        "ImportCredential=network.link.*\n"
+        "ImportCredential=network.netdev.*\n"
+        "ImportCredential=network.network.*\n"
     )
     assert "systemd-network-generator" in skill
     assert "/run/systemd/network/" in skill
