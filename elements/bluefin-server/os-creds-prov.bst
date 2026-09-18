@@ -20,6 +20,11 @@ sources:
     path: files/os/creds/systemd/system
     directory: systemd-src
 
+# Disable binary stripping; this element only installs text files and the
+# runtime-minimal sandbox does not include the stripper toolchain.
+variables:
+  strip-binaries: ""
+
 config:
   install-commands:
     - |
