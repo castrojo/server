@@ -80,6 +80,8 @@ def test_firstboot_credentials_are_noninteractive_and_presence_gated() -> None:
         assert f"ImportCredential={credential}" in unit
 
     assert "ExecStart=systemd-firstboot --force --welcome=no" in unit
+    assert "/usr/bin/hostname \"$hostname\"" in unit
+    assert unit.index("/usr/bin/hostname") < unit.index("/usr/bin/touch /etc/.bluefin-firstboot-credentials")
     assert "--prompt" not in unit
     assert "ConditionPathIsReadWrite=/etc" in unit
     assert "ConditionPathExists=!/etc/.bluefin-firstboot-credentials" in unit

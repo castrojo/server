@@ -55,8 +55,11 @@ for arbitrary first-boot files, and `systemd-network-generator` consumes
 `systemd-firstboot.service` stays masked, but
 `bluefin-firstboot-credentials.service` runs `systemd-firstboot`
 non-interactively when `firstboot.locale`, `firstboot.timezone`,
-`firstboot.hostname`, or related credentials are present. With no credentials,
-the target keeps the default DHCP network and does not prompt. The target DDI
+`firstboot.hostname`, or related credentials are present. When
+`firstboot.hostname` is supplied, the service also applies the live kernel
+hostname before `systemd-networkd` starts so first-boot DHCP uses it. With no
+credentials, the target keeps the default DHCP network and does not prompt. The
+target DDI
 also pre-stages the extracted CA certificate bundle
 (`/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem` and
 `/etc/ssl/certs/ca-certificates.crt`) and a standard `/etc/hosts` file for

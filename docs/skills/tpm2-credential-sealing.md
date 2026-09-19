@@ -78,10 +78,13 @@ cp /path/to/secured_credential.cred \
 --set-credential=passwd.hashed-password.root:/path/to/secured_credential.cred
 ```
 
-Example `tmpfiles.extra` payload writing SSH `authorized_keys` for an operator
-account (the account itself must already be defined by `systemd-sysusers`):
+Example `tmpfiles.extra` payload writing SSH `authorized_keys` for the `core`
+operator account. The account must already be defined by `systemd-sysusers`,
+and the payload must create the parent directories before writing the file:
 
 ```text
+d /var/home/core 0700 core core -
+d /var/home/core/.ssh 0700 core core -
 f~ /var/home/core/.ssh/authorized_keys 0600 core core - c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTEAAAA...
 ```
 
